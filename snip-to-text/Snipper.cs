@@ -88,6 +88,21 @@ namespace snip_to_text {
 
         }
 
+        protected override void OnPaint(PaintEventArgs e) {
+            // Draw the current selection
+            using (Brush br = new SolidBrush(Color.FromArgb(120, Color.White))) {
+                int x1 = rcSelect.X; int x2 = rcSelect.X + rcSelect.Width;
+                int y1 = rcSelect.Y; int y2 = rcSelect.Y + rcSelect.Height;
+                e.Graphics.FillRectangle(br, new Rectangle(0, 0, x1, this.Height));
+                e.Graphics.FillRectangle(br, new Rectangle(x2, 0, this.Width - x2, this.Height));
+                e.Graphics.FillRectangle(br, new Rectangle(x1, 0, x2 - x1, y1));
+                e.Graphics.FillRectangle(br, new Rectangle(x1, y2, x2 - x1, this.Height - y2));
+            }
+            using (Pen pen = new Pen(Color.Red, 3)) {
+                e.Graphics.DrawRectangle(pen, rcSelect);
+            }
+        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
             
             //cancel snip on esc
