@@ -1,3 +1,5 @@
+using Tesseract;
+
 namespace snip_to_text
 {
     public partial class Form1 : Form
@@ -6,26 +8,38 @@ namespace snip_to_text
         {
             InitializeComponent();
 
-            Button b = new Button();
+            //make form invisible
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.Opacity = 0;
+            this.Size = new Size(0, 0);
 
-            b.Location = new Point(0, 0);
-            b.Height = 30;
-            b.Width = 250;
-
-            b.Text = "snip";
-
-            b.Click += new EventHandler(B_Click);
-
-            Controls.Add(b);
+            // run snipping process on startup
+            this.Load += new EventHandler(Form1_Load);
 
         }
 
-        private void B_Click(object sender, EventArgs e) {
+        private void Form1_Load(object sender, EventArgs e) {
+
+            // take and save screenshot
             var bmp = Snipper.Snip();
-            if (bmp != null ) {
-                bmp.Save("image.png", System.Drawing.Imaging.ImageFormat.Png);
+            if (bmp == null) {
                 System.Windows.Forms.Application.Exit();
+                return;
+            } 
+
+            // process image
+            using (var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default)) {
+                using (var page = engine.Process(PixConverter.ToPix(new Bitmap(bmp)))) {
+                    var text = page.GetText();
+                    if (text != null && text != "") {
+                        Clipboard.SetText(text);
+                    }
+
+                    // Console.Out.WriteLine(text);
+
+                }
             }
+            System.Windows.Forms.Application.Exit();
         }
 
     }
